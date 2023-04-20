@@ -2,7 +2,7 @@
 
 This directory contains an example system, ```solvated.pdb```, ```solvated.rst7```, ```solvated.prm7```. This is a complex of a CDK2 protein (PDB 1PXJ) structure and a docking-generated ligand (PDB 1JVP) pose, set in a triclinic box, solvated with TIP3P waters and counter-ions.
 
-If you type ```python ../openbpmd.py -h```, you should see a description that follows the script and some of the following arguments:
+If you type ```python openbpmd.py -h```, you should see a description that follows the script and some of the following arguments:
 
 ```
   -h, --help            show this help message and exit

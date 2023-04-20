@@ -1,0 +1,33 @@
+package :
+  name: openbpmd
+  version: 1.0.1
+
+source: 
+path: ..
+
+build:
+  number: 0
+  noarch: python
+  script:
+    - mkdir -p $PREFIX/site-packages
+    - cp -r $RECIPE_DIR/../openbpmd $PREFIX/site-packages/openbpmd
+
+requirements:
+  build:
+    - python>=3.5
+    - pytest
+  run:
+    - openmm>=7.4.0
+    - mdanalysis
+    - mdtraj
+    - parmed
+
+test:
+  requires:
+    - pytest
+
+about:
+  home: https://github.com/dlukauskis/OpenBPMD
+    #home: https://github.com/Gervasiolab/OpenBPMD
+  summary: An open-source Python module for running Binding Pose Metadynamics with OpenMM.
+  license: MIT
