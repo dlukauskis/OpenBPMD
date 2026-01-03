@@ -11,6 +11,15 @@ build:
   script:
     - mkdir -p $PREFIX/site-packages
     - cp -r $RECIPE_DIR/../openbpmd $PREFIX/site-packages/openbpmd
+    - cp $RECIPE_DIR/../openbpmd.py $PREFIX/site-packages/openbpmd/openbpmd.py
+
+post-link:
+  commands:
+    - conda env config vars set OPENBPMD=$CONDA_PREFIX/lib/python3.11/site-packages/openbpmd -n tmp
+
+run:
+  env:
+    OPENBPMD: $PREFIX/site-packages/openbpmd/
 
 requirements:
   build:

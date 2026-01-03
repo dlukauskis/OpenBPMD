@@ -3,10 +3,13 @@ import numpy as np
 import os
 import sys
 import shutil
+# TODO: make openbpmd an installable python package
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 #import openbpmd
 import simulation
 import analysis
+
+# TODO: use an actual tmpdirs for the tests
 
 def test_get_pose_score(ref_pdb = os.path.join('files','solute.pdb'),
                         ref_trj = os.path.join('files','solute.dcd'),
@@ -16,14 +19,14 @@ def test_get_pose_score(ref_pdb = os.path.join('files','solute.pdb'),
     score np array.
     """
     # Run the function
-    PoseScoreArr = analysis.get_pose_score(ref_pdb,
-                                  ref_trj,
-                                  lig_resname)
+    PoseScoreArr = analysis.get_pose_score(
+        ref_pdb, ref_trj, lig_resname,
+    )
 
     # Compare its outputs with a reference
     ref_arr = os.path.join('files','reference_score_arrs.npy')
     known_PoseScoreArr = np.load(ref_arr)[0]
-    assert np.all(PoseScoreArr == PoseScoreArr)
+    assert np.all(PoseScoreArr == known_PoseScoreArr)
 
 
 def test_get_contact_score(ref_pdb = os.path.join('files','solute.pdb'),
@@ -34,15 +37,15 @@ def test_get_contact_score(ref_pdb = os.path.join('files','solute.pdb'),
     score np array.
     """
     # Run the function
-    ContactScoreArr = analysis.get_contact_score(ref_pdb,
-                                        ref_trj,
-                                        lig_resname)
+    ContactScoreArr = analysis.get_contact_score(
+        ref_pdb, ref_trj, lig_resname,
+    )
 
     # Compare its outputs with a reference
     ref_arr = os.path.join('files','reference_score_arrs.npy')
     known_ContactScoreArr = np.load(ref_arr)[1]
 
-    assert np.all(known_ContactScoreArr == ContactScoreArr)
+    assert np.all(ContactScoreArr == known_ContactScoreArr)
 
 
 def test_minimize(structure_file=os.path.join('files','solvated.rst7'),
@@ -55,7 +58,9 @@ def test_minimize(structure_file=os.path.join('files','solvated.rst7'),
     # Create a tmp dir for writing the structure
     os.mkdir(out_dir)
 
-    simulation.minimize(parameter_file, structure_file, out_dir, min_file_name)
+    simulation.minimize(
+        parameter_file, structure_file, out_dir, min_file_name
+    )
     out_file = os.path.join(out_dir, min_file_name)
     assert os.path.isfile(out_file)
     shutil.rmtree(out_dir)
@@ -71,8 +76,9 @@ def test_equilibrate(min_eq=os.path.join('files','minimized_system.pdb'),
     # Create a tmp dir for writing the files
     os.mkdir(out_dir)
 
-    simulation.equilibrate(min_eq, parameter_file, structure_file, 
-			   out_dir, eq_file_name)
+    simulation.equilibrate(
+        min_eq, parameter_file, structure_file, out_dir, eq_file_name
+    )
     # check if the output file is written
     out_file = os.path.join(out_dir, eq_file_name)
 
@@ -97,7 +103,8 @@ def test_produce(out_dir='test_out', rep_idx=0, lig_resname='MOL',
         os.mkdir(rep_dir)
 
     simulation.produce(out_dir, rep_idx, lig_resname, eq_structure_file,
-            parameter_file, structure_file, hill_height, sim_time)
+        parameter_file, structure_file, hill_height, sim_time
+    )
 
     # check if the output files were written
     written_files = 'trj.dcd','COLVAR.npy','sim_log.csv'

@@ -27,7 +27,7 @@ def collect_results(in_dir, out_dir):
     glob_str = os.path.join(in_dir,'rep_*')
     nreps = len(glob.glob(glob_str))
     for idx in range(0, nreps):
-        f = os.path.join(in_dir,f'rep_{idx}','bpm_results.csv')
+        f = os.path.join(in_dir,f'rep_{idx}','bpmd_results.csv')
         df = pd.read_csv(f)
         # Since we only want last 2 ns, get the index of
         # the last 20% of the data points
@@ -161,9 +161,9 @@ def get_pose_score(structure_file, trajectory_file, lig_resname):
     pose_scores : np.array
         PoseScore for every frame of the trajectory.
     """
-    # Load a MDA universe with the trajectory
+    # Load an MDA universe with the trajectory
     u = mda.Universe(structure_file, trajectory_file)
-    # Align each frame using the backbone as reference
+    # Align each frame using the backbone as a reference
     # Calculate the RMSD of ligand heavy atoms
     r = rms.RMSD(u, select='backbone',
                  groupselections=[f'resname {lig_resname} and not name H*'],
@@ -199,7 +199,7 @@ def plot_all_reps(run_dir, save_fig=False):
 
     # Fill those matrices with the scores from each repeat
     for idx, rep_dir in enumerate(rep_dirs):
-        f = os.path.join(rep_dir, 'bpm_results.csv')
+        f = os.path.join(rep_dir, 'bpmd_results.csv')
         df = pd.read_csv(f)
         CompScores[idx] = df['CompScore']
         PoseScores[idx] = df['PoseScore']

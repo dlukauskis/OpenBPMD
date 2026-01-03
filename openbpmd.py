@@ -17,10 +17,7 @@ descriptn = \
     CompScore = PoseScore - 5 * ContactScore
     """
 
-# OpenMM
-#from simtk.openmm.app import *
-
-# Own functions for analysis
+# Own functions for analysis and production
 import openbpmd.analysis
 import openbpmd.simulation
 
@@ -28,14 +25,13 @@ import openbpmd.simulation
 import argparse
 import numpy as np
 import mdtraj as md
-import parmed as pmd
-import glob
+import pandas as pd
 import os
 
 
-__author__ = "Dominykas Lukauskis"
-__version__ = "1.0.1"
-__email__ = "dominykas.lukauskis.19@ucl.ac.uk"
+__author__ = 'Dominykas Lukauskis'
+__version__ = '1.0.1'
+__email__ = 'lukauskisdominykas@gmail.com'
 
 
 def main(args):
@@ -79,18 +75,22 @@ def main(args):
     min_file_name = 'minimized_system.pdb'
     if not os.path.isfile(os.path.join(args.output,min_file_name)):
         print("Minimizing...")
-        openmm.simulation.minimize(args.parameters, coords.positions, args.output, min_file_name)
+        openbpmd.simulation.minimize(
+            args.parameters, args.structure, args.output, min_file_name
+        )
     min_pdb = os.path.join(args.output, min_file_name)
 
     # Equilibrate
     eq_file_name = 'equil_system.pdb'
     if not os.path.isfile(os.path.join(args.output, eq_file_name)):
         print("Equilibrating...")
-        openmm.simulation.equilibrate(min_pdb, args.parameters, args.output, eq_file_name)
+        openbpmd.simulation.equilibrate(
+            min_pdb, args.parameters, args.structure, args.output, eq_file_name
+        )
     eq_pdb = os.path.join(args.output,eq_file_name)
     cent_eq_pdb = os.path.join(args.output,'centred_'+eq_file_name)
     if os.path.isfile(eq_pdb) and not os.path.isfile(cent_eq_pdb):
-	# mdtraj can't use GMX TOP, so we have to specify the GRO file instead
+        # mdtraj can't use GMX TOP, so we have to specify the GRO file instead
         if args.structure.endswith('.gro'):
             mdtraj_top = args.structure
         else:
@@ -105,17 +105,23 @@ def main(args):
         if not os.path.isdir(rep_dir):
             os.mkdir(rep_dir)
 
-        if os.path.isfile(os.path.join(rep_dir,'bpm_results.csv')):
+        if os.path.isfile(os.path.join(rep_dir,'bpmd_results.csv')):
             continue
         
-        openmm.simulation.produce(args.output, idx, args.lig_resname, eq_pdb,
-                                  args.parameters, args.structure, args.hill_height, 10)
+        openbpmd.simulation.produce(
+            args.output, idx, args.lig_resname, eq_pdb, args.parameters,
+            args.structure, args.hill_height, 10
+        )
                 
         trj_name = os.path.join(rep_dir,'trj.dcd')
                 
-        PoseScoreArr = openbpmd.analysis.get_pose_score(cent_eq_pdb, trj_name, args.lig_resname)
+        PoseScoreArr = openbpmd.analysis.get_pose_score(
+            cent_eq_pdb, trj_name, args.lig_resname
+        )
 
-        ContactScoreArr = openbpmd.analysis.get_contact_score(cent_eq_pdb, trj_name, args.lig_resname)
+        ContactScoreArr = openbpmd.analysis.get_contact_score(
+            cent_eq_pdb, trj_name, args.lig_resname
+        )
 
         # Calculate the CompScore at every frame
         CompScoreArr = np.zeros(99)
@@ -129,7 +135,7 @@ def main(args):
         # Save a DataFrame to CSV
         df = pd.DataFrame(Scores, columns=['CompScore', 'PoseScore',
                                            'ContactScore'])
-        df.to_csv(os.path.join(rep_dir,'bpm_results.csv'), index=False)
+        df.to_csv(os.path.join(rep_dir,'bpmd_results.csv'), index=False)
                 
     openbpmd.analysis.collect_results(args.output, args.output)
 

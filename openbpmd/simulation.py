@@ -16,7 +16,11 @@ import mdtraj as md
 import MDAnalysis as mda
 import os
 
-def minimize(parm_file, structure_file, out_dir, min_file_name):
+
+# TODO: add default types
+def minimize(
+    parm_file, structure_file, out_dir, min_file_name
+):
     """An energy minimization function down with an energy tolerance
     of 10 kJ/mol.
 
@@ -72,8 +76,10 @@ def minimize(parm_file, structure_file, out_dir, min_file_name):
 
     return None
 
-
-def equilibrate(min_pdb, parm_file, structure_file, out_dir, eq_file_name):
+# TODO: add default types
+def equilibrate(
+    min_pdb, parm_file, structure_file, out_dir, eq_file_name
+):
     """A function that does a 500 ps NVT equilibration with position
     restraints, with a 5 kcal/mol/A**2 harmonic constant on solute heavy
     atoms, using a 2 fs timestep.
@@ -121,7 +127,7 @@ def equilibrate(min_pdb, parm_file, structure_file, out_dir, eq_file_name):
     # modeller.topology.
     system = parm.createSystem(
         nonbondedMethod=PME,
-        nonbondedCutoff=1*nanometers,
+        nonbondedCutoff=1 * nanometers,
         constraints=HBonds,
     )
     # Add the harmonic restraints on the positions
@@ -143,13 +149,14 @@ def equilibrate(min_pdb, parm_file, structure_file, out_dir, eq_file_name):
         nonbonded.addException(i, j, 0, 1, 0)
         # ... but will be have a harmonic restraint ('bond')
         # between the two atoms
-        restraint.addBond(i, j, 0*nanometers,
+        restraint.addBond(i, j, 0 * nanometers,
                           5*kilocalories_per_mole/angstrom**2)
         dummyIndex.append(j)
         input_positions.append(positions[i])
 
-    integrator = LangevinIntegrator(300*kelvin, 1/picosecond,
-                                    0.002*picoseconds)
+    integrator = LangevinIntegrator(
+        300 * kelvin, 1 / picosecond, 0.002 * picoseconds
+    )
     platform = Platform.getPlatformByName('CUDA')
     properties = {'CudaPrecision': 'mixed'}
     sim = Simulation(parm.topology, system, integrator,
@@ -167,9 +174,10 @@ def equilibrate(min_pdb, parm_file, structure_file, out_dir, eq_file_name):
 
     return None
 
-
-def produce(out_dir, idx, lig_resname, eq_pdb, parm_file,
-            structure_file, set_hill_height, set_sim_time):
+# TODO: add default types
+def produce(
+    out_dir, idx, lig_resname, eq_pdb, parm_file, structure_file,
+    set_hill_height, set_sim_time):
     """An OpenBPMD production simulation function. Ligand RMSD is biased with
     metadynamics. The integrator uses a 4 fs time step and
     runs for 10 ns, writing a frame every 100 ps.
@@ -232,7 +240,7 @@ def produce(out_dir, idx, lig_resname, eq_pdb, parm_file,
     # Set up the system to run metadynamics
     system = parm.createSystem(
         nonbondedMethod=PME,
-        nonbondedCutoff=1*nanometers,
+        nonbondedCutoff=1 * nanometers,
         constraints=HBonds,
         hydrogenMass=4*amu
     )
@@ -276,8 +284,9 @@ def produce(out_dir, idx, lig_resname, eq_pdb, parm_file,
                         saveFrequency=250000)
 
     # Set up and run metadynamics
-    integrator = LangevinIntegrator(300*kelvin, 1.0/picosecond,
-                                    0.004*picoseconds)
+    integrator = LangevinIntegrator(
+        300 * kelvin, 1.0 / picosecond, 0.004 * picoseconds
+    )
     platform = Platform.getPlatformByName('CUDA')
     properties = {'CudaPrecision': 'mixed'}
 
@@ -285,14 +294,14 @@ def produce(out_dir, idx, lig_resname, eq_pdb, parm_file,
                             properties)
     simulation.context.setPositions(input_positions)
 
-    trj_name = os.path.join(write_dir,'trj.dcd')
+    trj_name = os.path.join(write_dir, 'trj.dcd')
 
     sim_time = set_sim_time  # ns
     steps = 250000 * sim_time
 
     simulation.reporters.append(DCDReporter(trj_name, 25000))  # every 100 ps
     simulation.reporters.append(StateDataReporter(
-                                os.path.join(write_dir,'sim_log.csv'), 250000,
+                                os.path.join(write_dir, 'sim_log.csv'), 250000,
                                 step=True, temperature=True, progress=True,
                                 remainingTime=True, speed=True,
                                 totalSteps=steps, separator=','))  # every 1 ns

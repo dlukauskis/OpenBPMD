@@ -8,4 +8,4 @@ Dominykas Lukauskis
 
 __version__ = "1.0.1"
 
-import analysis, simulation
+from openbpmd import analysis, simulation
