@@ -1,3 +1,5 @@
+# NOTE - worked has moved to [OpenBPMD2](https://github.com/dlukauskis/OpenBPMD2), so this is no longer maintained
+
 # OpenBPMD - evaluating ligand pose stability using metadynamics
 
 ### Background 
